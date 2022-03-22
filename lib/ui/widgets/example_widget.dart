@@ -1,33 +1,45 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mvvm/domain/services/user_service.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+class ViewModelState {
+  final String ageTitle;
+  ViewModelState({
+    required this.ageTitle,
+  });
+}
 
 class ViewModel extends ChangeNotifier {
-  var _age = 0;
-  int get age => _age;
+  final _userService = UserService();
+  var _state = ViewModelState(ageTitle: '');
+  ViewModelState get state => _state;
+
   void loadValue() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    _age = sharedPreferences.getInt('age') ?? 0;
-    notifyListeners();
+    await _userService.loadValue();
+    _updateState();
   }
 
   ViewModel() {
     loadValue();
+
+    // _userService.loadValue().then((_) => notifyListeners());
   }
 
-  Future<void> increment() async {
-    _age += 1;
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setInt('age', _age);
-    notifyListeners();
+  Future<void> onIncrementButtonPressed() async {
+    _userService.incrementAge();
+    // _state = ViewModelState(ageTitle: _userService.user.age.toString());
+    // notifyListeners();
+    _updateState();
   }
 
-  Future<void> decrement() async {
-    _age = max(age - 1, 0);
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setInt('age', _age);
+  Future<void> onDecrementButtonPressed() async {
+    _userService.decrementAge();
+    _updateState();
+  }
+
+  void _updateState() {
+    final user = _userService.user;
+    _state = ViewModelState(ageTitle: user.age.toString());
     notifyListeners();
   }
 }
@@ -60,8 +72,8 @@ class _AgeTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final age = context.select((ViewModel vm) => vm.age);
-    return Text('$age');
+    final title = context.select((ViewModel vm) => vm.state.ageTitle);
+    return Text(title);
   }
 }
 
@@ -72,7 +84,7 @@ class _AgeIncrementWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.read<ViewModel>();
     return ElevatedButton(
-      onPressed: viewModel.increment,
+      onPressed: viewModel.onIncrementButtonPressed,
       child: const Text('+'),
     );
   }
@@ -85,7 +97,7 @@ class _AgeDecrementWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.read<ViewModel>();
     return ElevatedButton(
-      onPressed: viewModel.decrement,
+      onPressed: viewModel.onDecrementButtonPressed,
       child: const Text('-'),
     );
   }
