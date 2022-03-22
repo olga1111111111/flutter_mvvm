@@ -15,7 +15,7 @@ class ViewModel extends ChangeNotifier {
   ViewModelState get state => _state;
 
   void loadValue() async {
-    await _userService.loadValue();
+    await _userService.initialize();
     _updateState();
   }
 
