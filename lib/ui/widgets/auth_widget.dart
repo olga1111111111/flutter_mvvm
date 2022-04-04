@@ -7,10 +7,15 @@ import 'package:flutter_application_mvvm/domain/services/auth_service.dart';
 enum _ViewModelAuthButtonState { canSubmit, authProcess, disable }
 
 class _ViewModelState {
-  final String authErrorTitle;
-  final String login;
-  final String password;
-  final bool isAuthInProcess;
+  // final String authErrorTitle;
+  // final String login;
+  // final String password;
+  // final bool isAuthInProcess;
+
+  String authErrorTitle = '';
+  String login = '';
+  String password = '';
+  bool isAuthInProcess = false;
 
   var _authButtonState = _ViewModelAuthButtonState.disable;
 
@@ -24,42 +29,47 @@ class _ViewModelState {
     return _authButtonState;
   }
 
-  _ViewModelState({
-    this.authErrorTitle = '',
-    this.login = '',
-    this.password = '',
-    this.isAuthInProcess = false,
-  });
+  _ViewModelState(
+      //   {
+      //   this.authErrorTitle = '',
+      //   this.login = '',
+      //   this.password = '',
+      //   this.isAuthInProcess = false,
+      // }
+      );
 
-  _ViewModelState copyWith({
-    String? authErrorTitle,
-    String? login,
-    String? password,
-    bool? isAuthInProcess,
-  }) {
-    return _ViewModelState(
-      authErrorTitle: authErrorTitle ?? this.authErrorTitle,
-      login: login ?? this.login,
-      password: password ?? this.password,
-      isAuthInProcess: isAuthInProcess ?? this.isAuthInProcess,
-    );
-  }
+  // _ViewModelState copyWith({
+  //   String? authErrorTitle,
+  //   String? login,
+  //   String? password,
+  //   bool? isAuthInProcess,
+  // }) {
+  //   return _ViewModelState(
+  //     authErrorTitle: authErrorTitle ?? this.authErrorTitle,
+  //     login: login ?? this.login,
+  //     password: password ?? this.password,
+  //     isAuthInProcess: isAuthInProcess ?? this.isAuthInProcess,
+  //   );
+  // }
 }
 
 class _ViewModel extends ChangeNotifier {
   final _authService = AuthService();
-  var _state = _ViewModelState();
+  // var _state = _ViewModelState();
+  final _state = _ViewModelState();
   _ViewModelState get state => _state;
 
   void changeLogin(String value) {
     if (_state.login == value) return;
-    _state = _state.copyWith(login: value);
+    // _state = _state.copyWith(login: value);
+    _state.login = value;
     notifyListeners();
   }
 
   void changePassword(String value) {
     if (_state.password == value) return;
-    _state = _state.copyWith(password: value);
+    // _state = _state.copyWith(password: value);
+    _state.password = value;
     notifyListeners();
   }
 
@@ -69,24 +79,33 @@ class _ViewModel extends ChangeNotifier {
 
     if (login.isEmpty || password.isEmpty) return;
 
-    _state = _state.copyWith(authErrorTitle: '', isAuthInProcess: true);
+    // _state = _state.copyWith(authErrorTitle: '', isAuthInProcess: true);
+    _state.authErrorTitle = '';
+    _state.isAuthInProcess = true;
 
     notifyListeners();
 
     try {
       await _authService.login(login, password);
-      _state = _state.copyWith(isAuthInProcess: false);
+      // _state = _state.copyWith(isAuthInProcess: false);
+      _state.isAuthInProcess = false;
       notifyListeners();
     } on AuthApiProviderIncorectLoginDataError {
-      _state = _state.copyWith(
-          authErrorTitle: 'Неправильный логин или пароль',
-          isAuthInProcess: false);
+      // _state = _state.copyWith(
+      //     authErrorTitle: 'Неправильный логин или пароль',
+      //     isAuthInProcess: false);
+      _state.authErrorTitle = 'Неправильный логин или пароль';
+      _state.isAuthInProcess = false;
+
       notifyListeners();
     } catch (exeption) {
-      _state = _state.copyWith(
-          authErrorTitle: 'случилась неприятность, попробуйте повторить позже',
-          isAuthInProcess: false);
-      notifyListeners();
+      // _state = _state.copyWith(
+      //     authErrorTitle: 'случилась неприятность, попробуйте повторить позже',
+      //     isAuthInProcess: false);
+      // notifyListeners();
+      _state.authErrorTitle =
+          'случилась неприятность, попробуйте повторить позже';
+      _state.isAuthInProcess = false;
     }
   }
 }
