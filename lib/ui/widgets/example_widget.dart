@@ -57,7 +57,11 @@ class ExampleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber,
+      appBar: AppBar(
+        actions: [
+          ElevatedButton(onPressed: () {}, child: const Text('выход')),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: Column(
