@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mvvm/ui/navigation/main_navigation.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_application_mvvm/domain/data_providers/auth_api_provider.dart';
@@ -90,7 +91,7 @@ class _ViewModel extends ChangeNotifier {
       // _state = _state.copyWith(isAuthInProcess: false);
       _state.isAuthInProcess = false;
       notifyListeners();
-      Navigator.of(context).pushNamedAndRemoveUntil('loader', (route) => false);
+      MainNavigation.showLoader(context);
     } on AuthApiProviderIncorectLoginDataError {
       // _state = _state.copyWith(
       //     authErrorTitle: 'Неправильный логин или пароль',

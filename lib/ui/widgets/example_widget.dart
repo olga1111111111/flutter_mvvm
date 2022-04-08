@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mvvm/domain/services/auth_service.dart';
 import 'package:flutter_application_mvvm/domain/services/user_service.dart';
+import 'package:flutter_application_mvvm/ui/navigation/main_navigation.dart';
 import 'package:provider/provider.dart';
 
 class _ViewModelState {
@@ -48,7 +49,7 @@ class _ViewModel extends ChangeNotifier {
   Future<void> onLogoutPressed(BuildContext context) async {
     await _authService.logout();
 
-    Navigator.of(context).pushNamedAndRemoveUntil('loader', (route) => false);
+    MainNavigation.showLoader(context);
   }
 }
 
