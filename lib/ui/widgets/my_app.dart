@@ -15,6 +15,8 @@ class MyApp extends StatelessWidget {
       home: LoaderWidget.create(),
       title: "Flutter Demo",
       // routes: {
+      //   'loader': (_) => LoaderWidget.create(),
+      // },
       //   'auth': (_) => AuthWidget.create(),
       //   'example': (_) => ExampleWidget.create()
       // },
@@ -26,11 +28,17 @@ class MyApp extends StatelessWidget {
                 AuthWidget.create(),
             transitionDuration: Duration.zero,
           );
-        } else //if (settings.name == 'example')
-        {
+        } else if (settings.name == 'example') {
           return PageRouteBuilder(
             pageBuilder: (context, animation1, animation2) =>
                 ExampleWidget.create(),
+            transitionDuration: Duration.zero,
+          );
+        } else //if (settings.name == 'loader')
+        {
+          return PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) =>
+                LoaderWidget.create(),
             transitionDuration: Duration.zero,
           );
         }

@@ -73,7 +73,7 @@ class _ViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> onAuthButtonPressed() async {
+  Future<void> onAuthButtonPressed(BuildContext context) async {
     final login = _state.login;
     final password = _state.password;
 
@@ -90,6 +90,7 @@ class _ViewModel extends ChangeNotifier {
       // _state = _state.copyWith(isAuthInProcess: false);
       _state.isAuthInProcess = false;
       notifyListeners();
+      Navigator.of(context).pushNamedAndRemoveUntil('loader', (route) => false);
     } on AuthApiProviderIncorectLoginDataError {
       // _state = _state.copyWith(
       //     authErrorTitle: 'Неправильный логин или пароль',
@@ -208,7 +209,7 @@ class AuthButtonWidget extends StatelessWidget {
         ? const CircularProgressIndicator()
         : const Text('авторизоваться');
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: () => onPressed?.call(context),
       child: child,
     );
   }
