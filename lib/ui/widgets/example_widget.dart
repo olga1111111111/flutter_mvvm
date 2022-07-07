@@ -17,34 +17,45 @@ class _ViewModel extends ChangeNotifier {
   var _state = _ViewModelState(ageTitle: '');
   _ViewModelState get state => _state;
 
-  void loadValue() async {
-    await _userService.initialize();
-    _updateState();
-  }
+  // void loadValue() async {
+  //   await _userService.initialize();
+  //   _updateState();
+  // }
 
   _ViewModel() {
-    loadValue();
+    _userService.startListenUser((user) {
+      _state = _ViewModelState(
+        ageTitle: user.age.toString(),
+      );
+      notifyListeners();
+    });
 
+    // loadValue();
     // _userService.loadValue().then((_) => notifyListeners());
   }
-
-  Future<void> onIncrementButtonPressed() async {
-    _userService.incrementAge();
-    // _state = ViewModelState(ageTitle: _userService.user.age.toString());
-    // notifyListeners();
-    _updateState();
+  @override
+  void dispose() {
+    _userService.stopListenUser();
+    super.dispose();
   }
 
-  Future<void> onDecrementButtonPressed() async {
-    _userService.decrementAge();
-    _updateState();
-  }
+  // Future<void> onIncrementButtonPressed() async {
+  //   _userService.incrementAge();
+  //   // _state = ViewModelState(ageTitle: _userService.user.age.toString());
+  //   // notifyListeners();
+  //   _updateState();
+  // }
 
-  void _updateState() {
-    final user = _userService.user;
-    _state = _ViewModelState(ageTitle: user.age.toString());
-    notifyListeners();
-  }
+  // Future<void> onDecrementButtonPressed() async {
+  //   _userService.decrementAge();
+  //   _updateState();
+  // }
+
+  // void _updateState() {
+  //   final user = _userService.user;
+  //   _state = _ViewModelState(ageTitle: user.age.toString());
+  //   notifyListeners();
+  // }
 
   Future<void> onLogoutPressed(BuildContext context) async {
     await _authService.logout();
@@ -74,17 +85,8 @@ class ExampleWidget extends StatelessWidget {
               child: const Text('выход')),
         ],
       ),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              _AgeTitle(),
-              _AgeIncrementWidget(),
-              _AgeDecrementWidget(),
-            ],
-          ),
-        ),
+      body: const SafeArea(
+        child: Center(child: _AgeTitle()),
       ),
     );
   }
@@ -100,28 +102,28 @@ class _AgeTitle extends StatelessWidget {
   }
 }
 
-class _AgeIncrementWidget extends StatelessWidget {
-  const _AgeIncrementWidget({Key? key}) : super(key: key);
+// class _AgeIncrementWidget extends StatelessWidget {
+//   const _AgeIncrementWidget({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final viewModel = context.read<_ViewModel>();
-    return ElevatedButton(
-      onPressed: viewModel.onIncrementButtonPressed,
-      child: const Text('+'),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final viewModel = context.read<_ViewModel>();
+//     return ElevatedButton(
+//       onPressed: viewModel.onIncrementButtonPressed,
+//       child: const Text('+'),
+//     );
+//   }
+// }
 
-class _AgeDecrementWidget extends StatelessWidget {
-  const _AgeDecrementWidget({Key? key}) : super(key: key);
+// class _AgeDecrementWidget extends StatelessWidget {
+//   const _AgeDecrementWidget({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final viewModel = context.read<_ViewModel>();
-    return ElevatedButton(
-      onPressed: viewModel.onDecrementButtonPressed,
-      child: const Text('-'),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final viewModel = context.read<_ViewModel>();
+//     return ElevatedButton(
+//       onPressed: viewModel.onDecrementButtonPressed,
+//       child: const Text('-'),
+//     );
+//   }
+// }
