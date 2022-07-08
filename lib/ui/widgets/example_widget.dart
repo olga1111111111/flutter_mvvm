@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mvvm/domain/entity/user.dart';
 import 'package:flutter_application_mvvm/domain/services/auth_service.dart';
 import 'package:flutter_application_mvvm/domain/services/user_service.dart';
 import 'package:flutter_application_mvvm/ui/navigation/main_navigation.dart';
@@ -16,6 +19,7 @@ class _ViewModel extends ChangeNotifier {
   final _userService = UserService();
   var _state = _ViewModelState(ageTitle: '');
   _ViewModelState get state => _state;
+  StreamSubscription<User>? userSubscription;
 
   // void loadValue() async {
   //   await _userService.initialize();
@@ -23,19 +27,22 @@ class _ViewModel extends ChangeNotifier {
   // }
 
   _ViewModel() {
-    _userService.startListenUser((user) {
-      _state = _ViewModelState(
-        ageTitle: user.age.toString(),
-      );
+    _state = _ViewModelState(
+      ageTitle: _userService.user.age.toString(),
+    );
+    userSubscription = _userService.userStream.listen((user) {
+      _state = _ViewModelState(ageTitle: _userService.user.age.toString());
       notifyListeners();
     });
+    _userService.openConnect();
 
     // loadValue();
     // _userService.loadValue().then((_) => notifyListeners());
   }
   @override
   void dispose() {
-    _userService.stopListenUser();
+    userSubscription?.cancel();
+    _userService.closeConnect();
     super.dispose();
   }
 

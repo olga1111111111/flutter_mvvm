@@ -3,21 +3,23 @@
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_application_mvvm/domain/entity/user.dart';
 
 //changeNotifier (или  valueProvider ) или stream чтобы узнавать о переодических изменениях данных
 
-class UserDataProvider extends ChangeNotifier {
+class UserDataProvider {
   Timer? _timer;
   var _user = User(0);
+  final _controller = StreamController<User>();
+  //получать stream из любого места
+  Stream<User> get userStream => _controller.stream.asBroadcastStream();
   User get user => _user;
 
   void openConnect() {
     if (_timer != null) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _user = User(_user.age + 1);
-      notifyListeners();
+      _controller.add(_user);
     });
   }
 
