@@ -1,78 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mvvm/domain/services/auth_service.dart';
-import 'package:flutter_application_mvvm/domain/services/user_service.dart';
-import 'package:flutter_application_mvvm/ui/navigation/main_navigation.dart';
+import 'package:flutter_application_mvvm/domain/blocs/users_bloc.dart';
+
 import 'package:provider/provider.dart';
 
-class _ViewModelState {
-  final String ageTitle;
-  _ViewModelState({
-    required this.ageTitle,
-  });
-}
 
-class _ViewModel extends ChangeNotifier {
-  final _authService = AuthService();
-  final _userService = UserService();
-  var _state = _ViewModelState(ageTitle: '');
-  _ViewModelState get state => _state;
-
-  void loadValue() async {
-    await _userService.initialize();
-    _updateState();
-  }
-
-  _ViewModel() {
-    loadValue();
-
-    // _userService.loadValue().then((_) => notifyListeners());
-  }
-
-  Future<void> onIncrementButtonPressed() async {
-    _userService.incrementAge();
-    // _state = ViewModelState(ageTitle: _userService.user.age.toString());
-    // notifyListeners();
-    _updateState();
-  }
-
-  Future<void> onDecrementButtonPressed() async {
-    _userService.decrementAge();
-    _updateState();
-  }
-
-  void _updateState() {
-    final user = _userService.user;
-    _state = _ViewModelState(ageTitle: user.age.toString());
-    notifyListeners();
-  }
-
-  Future<void> onLogoutPressed(BuildContext context) async {
-    await _authService.logout();
-
-    MainNavigation.showLoader(context);
-  }
-}
 
 class ExampleWidget extends StatelessWidget {
   const ExampleWidget({Key? key}) : super(key: key);
 
-  static Widget create() {
-    return ChangeNotifierProvider(
-      create: (_) => _ViewModel(),
-      child: const ExampleWidget(),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.read<_ViewModel>();
+
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          ElevatedButton(
-              onPressed: () => viewModel.onLogoutPressed(context),
-              child: const Text('выход')),
-        ],
+
       ),
       body: SafeArea(
         child: Center(
@@ -95,8 +38,15 @@ class _AgeTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = context.select((_ViewModel vm) => vm.state.ageTitle);
-    return Text(title);
+    final bloc = context.read<UsersBloc>();
+
+    return StreamBuilder<UsersState>(
+        initialData: bloc.state,
+        stream: bloc.stream,
+        builder: (context, snapshot) {
+          final age = snapshot.requireData.currentUser.age;
+          return Text('$age');
+        });
   }
 }
 
@@ -105,9 +55,9 @@ class _AgeIncrementWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.read<_ViewModel>();
+    final bloc = context.read<UsersBloc>();
     return ElevatedButton(
-      onPressed: viewModel.onIncrementButtonPressed,
+      onPressed: bloc.incrementAge,
       child: const Text('+'),
     );
   }
@@ -118,9 +68,9 @@ class _AgeDecrementWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.read<_ViewModel>();
+    final bloc = context.read<UsersBloc>();
     return ElevatedButton(
-      onPressed: viewModel.onDecrementButtonPressed,
+      onPressed: bloc.decrementAge,
       child: const Text('-'),
     );
   }
