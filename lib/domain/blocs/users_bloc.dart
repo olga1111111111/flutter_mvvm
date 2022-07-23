@@ -4,7 +4,7 @@ import 'dart:math';
 import '../data_providers/user_data_provider.dart';
 import '../entity/user.dart';
 
-class UsersState{
+class UsersState {
   final User currentUser;
 
 //<editor-fold desc="Data Methods">
@@ -36,49 +36,89 @@ class UsersState{
     );
   }
 
-
-
 //</editor-fold>
 }
-class UsersBloc{
-  final _userDataProvider = UserDataProvider();
-  var _state = UsersState(currentUser: User(0));
-  final _stateController = StreamController<UsersState>.broadcast();
 
+abstract class UsersEvents {}
+
+class UsersIncrementEvent implements UsersEvents {}
+
+class UsersDecrementEvent implements UsersEvents {}
+
+class UsersInitializeEvent implements UsersEvents {}
+
+class UsersBloc {
+  final _userDataProvider = UserDataProvider();
+  var _state = UsersState(
+    currentUser: User(0),
+  );
+  final _eventController = StreamController<UsersEvents>.broadcast();
+  late final Stream<UsersState> _stateStream;
 
   UsersState get state => _state;
-  Stream<UsersState> get stream => _stateController.stream;
+  Stream<UsersState> get stream => _stateStream;
 
-
-  UsersBloc (){
-    initialize();
+  UsersBloc() {
+    _stateStream = _eventController.stream
+        .asyncExpand<UsersState>(_mapEventToState)
+        .asyncExpand(_updateState)
+        .asBroadcastStream();
+    _stateStream.listen((event) {});
+    dispatch(UsersInitializeEvent());
   }
-  void updateState(UsersState  state){
-    if(_state ==state) return;//исключить повторное обновление интерфейса
+  void dispatch(UsersEvents event) {
+    _eventController.add(event);
+  }
+
+  Stream<UsersState> _updateState(UsersState state) async* {
+    if (_state == state) return;
     _state = state;
-    _userDataProvider.saveValue(_state.currentUser);
-    _stateController.add(state);
-  }
-  Future<void> initialize() async {
-    final user =await _userDataProvider.loadValue();
-    updateState(_state.copyWith(currentUser: user  ));
-  }
-  void incrementAge() async {
-    var user  = _state.currentUser;
-  user =  user.copyWith(age:  user.age + 1);
-
-    updateState(_state.copyWith(currentUser: user  ));
-
-
-// //coхраняем новое значение в state и затем - в хранилище
-//   _state = _state.copyWith(currentUser: user);
-//     _userDataProvider.saveValue( user);
+    yield state;
   }
 
-  void decrementAge() async {
-    var user = _state.currentUser;
-     user = user.copyWith(age: max( user.age - 1, 0));
-    updateState(_state.copyWith(currentUser: user  ));
-
+  Stream<UsersState> _mapEventToState(UsersEvents event) async* {
+    if (event is UsersInitializeEvent) {
+      final user = await _userDataProvider.loadValue();
+      yield UsersState(currentUser: user);
+    } else if (event is UsersIncrementEvent) {
+      var user = _state.currentUser;
+      user = user.copyWith(age: user.age + 1);
+      await _userDataProvider.saveValue(user);
+      yield UsersState(currentUser: user);
+    } else if (event is UsersDecrementEvent) {
+      var user = _state.currentUser;
+      user = user.copyWith(age: max(user.age - 1, 0));
+      //заставляю функцию ждать сохранения
+      await _userDataProvider.saveValue(user);
+      yield UsersState(currentUser: user);
+    }
   }
+//   void _updateState(UsersState state) {
+//     if (_state == state) return; //исключить повторное обновление интерфейса
+//     _state = state;
+//     _userDataProvider.saveValue(_state.currentUser);
+//     _stateController.add(state);
+//   }
+//
+//   Future<void> _initialize() async {
+//     final user = await _userDataProvider.loadValue();
+//     _updateState(_state.copyWith(currentUser: user));
+//   }
+//
+//   void incrementAge() async {
+//     var user = _state.currentUser;
+//     user = user.copyWith(age: user.age + 1);
+//
+//     _updateState(_state.copyWith(currentUser: user));
+//
+// // //coхраняем новое значение в state и затем - в хранилище
+// //   _state = _state.copyWith(currentUser: user);
+// //    await _userDataProvider.saveValue( user);
+//   }
+//
+//   void decrementAge() async {
+//     var user = _state.currentUser;
+//     user = user.copyWith(age: max(user.age - 1, 0));
+//     _updateState(_state.copyWith(currentUser: user));
+//   }
 }
