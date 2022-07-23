@@ -63,7 +63,8 @@ class UsersBloc {
         .asyncExpand<UsersState>(_mapEventToState)
         .asyncExpand(_updateState)
         .asBroadcastStream();
-    _stateStream.listen((event) {});
+
+    // _stateStream.listen((event) {});
     dispatch(UsersInitializeEvent());
   }
   void dispatch(UsersEvents event) {
