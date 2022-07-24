@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:bloc/bloc.dart';
+
 import '../data_providers/user_data_provider.dart';
 import '../entity/user.dart';
 
@@ -40,45 +42,38 @@ class UsersState{
 
 //</editor-fold>
 }
-class UsersBloc{
+class UsersCubit extends Cubit<UsersState>{
   final _userDataProvider = UserDataProvider();
-  var _state = UsersState(currentUser: User(0));
-  final _stateController = StreamController<UsersState>.broadcast();
 
 
-  UsersState get state => _state;
-  Stream<UsersState> get stream => _stateController.stream;
 
 
-  UsersBloc (){
+
+
+
+
+  UsersCubit (): super(UsersState(currentUser: User(0))){
     initialize();
   }
-  void updateState(UsersState  state){
-    if(_state ==state) return;//исключить повторное обновление интерфейса
-    _state = state;
-    _userDataProvider.saveValue(_state.currentUser);
-    _stateController.add(state);
-  }
+
   Future<void> initialize() async {
     final user =await _userDataProvider.loadValue();
-    updateState(_state.copyWith(currentUser: user  ));
+     final newState = (state.copyWith(currentUser: user  ));
+     emit(newState);
   }
   void incrementAge() async {
-    var user  = _state.currentUser;
+    var user  = state.currentUser;
   user =  user.copyWith(age:  user.age + 1);
 
-    updateState(_state.copyWith(currentUser: user  ));
+    emit(state.copyWith(currentUser: user  ));
 
-
-// //coхраняем новое значение в state и затем - в хранилище
-//   _state = _state.copyWith(currentUser: user);
-//     _userDataProvider.saveValue( user);
   }
 
   void decrementAge() async {
-    var user = _state.currentUser;
+    var user = state.currentUser;
      user = user.copyWith(age: max( user.age - 1, 0));
-    updateState(_state.copyWith(currentUser: user  ));
+    emit(state.copyWith(currentUser: user  ));
 
   }
+
 }
