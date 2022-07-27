@@ -14,9 +14,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Provider(
+      home: Provider<UsersBloc>(
         create: (_) => UsersBloc(),
         child: const ExampleWidget(),
+        dispose: (context,value)  => value.close(),
       ),
       title: "Flutter Demo",
       // routes: {

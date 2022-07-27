@@ -3,20 +3,13 @@ import 'package:flutter_application_mvvm/domain/blocs/users_bloc.dart';
 
 import 'package:provider/provider.dart';
 
-
-
 class ExampleWidget extends StatelessWidget {
   const ExampleWidget({Key? key}) : super(key: key);
 
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-
-      ),
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -57,7 +50,7 @@ class _AgeIncrementWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = context.read<UsersBloc>();
     return ElevatedButton(
-      onPressed: () => bloc.dispatch(UsersIncrementEvent()),
+      onPressed: () => bloc.add(UsersIncrementEvent()),
       child: const Text('+'),
     );
   }
@@ -70,7 +63,7 @@ class _AgeDecrementWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = context.read<UsersBloc>();
     return ElevatedButton(
-      onPressed: () => bloc.dispatch(UsersDecrementEvent()),
+      onPressed: () => bloc.add(UsersDecrementEvent()),
       child: const Text('-'),
     );
   }

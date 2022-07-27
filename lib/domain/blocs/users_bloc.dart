@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+
 import '../data_providers/user_data_provider.dart';
 import '../entity/user.dart';
 
@@ -47,9 +50,51 @@ class UsersDecrementEvent implements UsersEvents {}
 
 class UsersInitializeEvent implements UsersEvents {}
 
-class UsersBloc {
+class UsersBloc extends Bloc<UsersEvents, UsersState> {
   final _userDataProvider = UserDataProvider();
-  var _state = UsersState(
+
+  UsersBloc() : super(UsersState(currentUser: User(0))) {
+    on<UsersEvents>((event, emit) async {
+      if (event is UsersInitializeEvent) {
+        final user = await _userDataProvider.loadValue();
+        emit(UsersState(currentUser: user));
+      } else if (event is UsersIncrementEvent) {
+        var user = state.currentUser;
+        user = user.copyWith(age: user.age + 1);
+        await _userDataProvider.saveValue(user);
+        emit(UsersState(currentUser: user));
+      } else if (event is UsersDecrementEvent) {
+        var user = state.currentUser;
+        user = user.copyWith(age: max(user.age - 1, 0));
+        //заставляю функцию ждать сохранения
+        await _userDataProvider.saveValue(user);
+        emit(UsersState(currentUser: user));
+      }
+    },
+        transformer: sequential());
+    // on<UsersInitializeEvent>((event, emit) async{
+    //   final user = await _userDataProvider.loadValue();
+    //   emit(UsersState(currentUser: user));
+    // });
+    // on<UsersIncrementEvent>((event, emit) async {
+    //   var  user = state.currentUser;
+    //   user = user.copyWith(age: user.age +1);
+    //   await _userDataProvider.saveValue(user);
+    //   emit(UsersState(currentUser: user));
+    // });
+    // on<UsersDecrementEvent>((event, emit) async{
+    //   var user = state.currentUser;
+    //   user = user.copyWith(age:max(user.age - 1, 0) );
+    //   await _userDataProvider.saveValue(user);
+    //   emit(UsersState(currentUser: user));
+    // });
+
+  }
+}
+
+
+  /*
+   var _state = UsersState(
     currentUser: User(0),
   );
   final _eventController = StreamController<UsersEvents>.broadcast();
@@ -58,6 +103,9 @@ class UsersBloc {
   UsersState get state => _state;
   Stream<UsersState> get stream => _stateStream;
 
+  void dispatch(UsersEvents event) {
+    _eventController.add(event);
+  }
   UsersBloc() {
     _stateStream = _eventController.stream
         .asyncExpand<UsersState>(_mapEventToState)
@@ -67,16 +115,11 @@ class UsersBloc {
     // _stateStream.listen((event) {});
     dispatch(UsersInitializeEvent());
   }
-  void dispatch(UsersEvents event) {
-    _eventController.add(event);
-  }
-
   Stream<UsersState> _updateState(UsersState state) async* {
     if (_state == state) return;
     _state = state;
     yield state;
   }
-
   Stream<UsersState> _mapEventToState(UsersEvents event) async* {
     if (event is UsersInitializeEvent) {
       final user = await _userDataProvider.loadValue();
@@ -93,7 +136,11 @@ class UsersBloc {
       await _userDataProvider.saveValue(user);
       yield UsersState(currentUser: user);
     }
-  }
+   */
+
+
+
+
 //   void _updateState(UsersState state) {
 //     if (_state == state) return; //исключить повторное обновление интерфейса
 //     _state = state;
@@ -122,4 +169,4 @@ class UsersBloc {
 //     user = user.copyWith(age: max(user.age - 1, 0));
 //     _updateState(_state.copyWith(currentUser: user));
 //   }
-}
+
