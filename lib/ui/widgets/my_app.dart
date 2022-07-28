@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_mvvm/domain/blocs/users_bloc.dart';
 
 import 'package:flutter_application_mvvm/ui/widgets/example_widget.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
-import 'package:provider/provider.dart';
+
 
 class MyApp extends StatelessWidget {
   const MyApp({
@@ -14,10 +15,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Provider<UsersBloc>(
+      home: BlocProvider<UsersBloc>(
         create: (_) => UsersBloc(),
         child: const ExampleWidget(),
-        dispose: (context,value)  => value.close(),
+
       ),
       title: "Flutter Demo",
       // routes: {

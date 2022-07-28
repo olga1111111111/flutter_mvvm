@@ -33,6 +33,7 @@ dependencies:
   shared_preferences: ^2.0.13
   bloc: ^8.0.3
   bloc_concurrency: ^0.2.0
+  flutter_bloc: ^8.0.1
 
 
   # The following adds the Cupertino Icons font to your application.
