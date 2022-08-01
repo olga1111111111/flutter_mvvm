@@ -61,6 +61,7 @@ class UsersBloc extends Bloc<UsersEvents, UsersState> {
       } else if (event is UsersIncrementEvent) {
         var user = state.currentUser;
         user = user.copyWith(age: user.age + 1);
+
         await _userDataProvider.saveValue(user);
         emit(UsersState(currentUser: user));
       } else if (event is UsersDecrementEvent) {
@@ -70,8 +71,7 @@ class UsersBloc extends Bloc<UsersEvents, UsersState> {
         await _userDataProvider.saveValue(user);
         emit(UsersState(currentUser: user));
       }
-    },
-        transformer: sequential());
+    }, transformer: sequential());
     // on<UsersInitializeEvent>((event, emit) async{
     //   final user = await _userDataProvider.loadValue();
     //   emit(UsersState(currentUser: user));
@@ -88,12 +88,10 @@ class UsersBloc extends Bloc<UsersEvents, UsersState> {
     //   await _userDataProvider.saveValue(user);
     //   emit(UsersState(currentUser: user));
     // });
-
   }
 }
 
-
-  /*
+/*
    var _state = UsersState(
     currentUser: User(0),
   );
@@ -138,9 +136,6 @@ class UsersBloc extends Bloc<UsersEvents, UsersState> {
     }
    */
 
-
-
-
 //   void _updateState(UsersState state) {
 //     if (_state == state) return; //исключить повторное обновление интерфейса
 //     _state = state;
@@ -169,4 +164,3 @@ class UsersBloc extends Bloc<UsersEvents, UsersState> {
 //     user = user.copyWith(age: max(user.age - 1, 0));
 //     _updateState(_state.copyWith(currentUser: user));
 //   }
-
